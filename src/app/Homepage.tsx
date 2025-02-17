@@ -19,7 +19,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
 
   const reviewsCollection = collection(db, "reviews"); // Firestore collection reference
 
-  // 🔥 Fetch reviews from Firestore when the page loads
+  // Fetch reviews from Firestore when the page loads
   useEffect(() => {
     const fetchReviews = async () => {
       const snapshot = await getDocs(reviewsCollection);
@@ -30,7 +30,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     fetchReviews();
   }, []);
 
-  // ✅ Store the review in Firestore
+  // Store the review in Firestore
   const handleSubmitReview = async () => {
     if (!location || !comment) return;
 
