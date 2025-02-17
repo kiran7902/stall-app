@@ -54,38 +54,71 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     setComment("");
   };
 
+  // Render stars based on rating
+  const renderStars = (rating: number) => {
+    const fullStars = "⭐".repeat(rating);
+    const emptyStars = "☆".repeat(5 - rating);
+    return fullStars + emptyStars;
+  };
+
   return (
-    <div style={{ textAlign: "center", padding: "20px" }}>
-      <h2>Welcome, {user.displayName || user.email}!</h2>
-      <button onClick={handleLogout}>Logout</button>
+    <div className="max-w-3xl mx-auto p-6">
+      <h2 className="text-2xl font-semibold text-center mb-6">
+        Welcome, {user.displayName || user.email}!
+      </h2>
+      <button
+        onClick={handleLogout}
+        className="w-full py-2 bg-red-500 text-white font-bold rounded-md hover:bg-red-600 transition duration-200 mb-6"
+      >
+        Logout
+      </button>
 
-      <h3>Leave a Restroom Review</h3>
-      <input
-        type="text"
-        placeholder="Location (e.g., Michigan Union 2nd Floor)"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        style={{ display: "block", margin: "10px auto" }}
-      />
-      <select value={rating} onChange={(e) => setRating(Number(e.target.value))}>
-        {[1, 2, 3, 4, 5].map((num) => (
-          <option key={num} value={num}>{num} Stars</option>
-        ))}
-      </select>
-      <textarea
-        placeholder="Leave your review..."
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        style={{ display: "block", margin: "10px auto", width: "80%" }}
-      />
-      <button onClick={handleSubmitReview}>Submit Review</button>
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold mb-4">Leave a Restroom Review</h3>
+        <input
+          type="text"
+          placeholder="Location (e.g., Michigan Union 2nd Floor)"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4"
+        />
+        <select
+          value={rating}
+          onChange={(e) => setRating(Number(e.target.value))}
+          className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4"
+        >
+          {[1, 2, 3, 4, 5].map((num) => (
+            <option key={num} value={num}>
+              {num} Stars
+            </option>
+          ))}
+        </select>
+        <textarea
+          placeholder="Leave your review..."
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4"
+        />
+        <button
+          onClick={handleSubmitReview}
+          className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition duration-200"
+        >
+          Submit Review
+        </button>
+      </div>
 
-      <h3>Recent Reviews</h3>
-      {reviews.length === 0 ? <p>No reviews yet.</p> : (
+      <h3 className="text-xl font-semibold mb-4">Recent Reviews</h3>
+      {reviews.length === 0 ? (
+        <p className="text-gray-600">No reviews yet.</p>
+      ) : (
         reviews.map((review) => (
-          <div key={review.id} style={{ border: "1px solid gray", padding: "10px", margin: "10px" }}>
-            <p><strong>{review.user}</strong> at <em>{review.location}</em></p>
-            <p>⭐ {review.rating} Stars</p>
+          <div key={review.id} className="border border-gray-300 rounded-lg p-4 mb-4">
+            <p className="font-semibold">{review.user}</p>
+            <p className="text-sm text-gray-600">at <em>{review.location}</em></p>
+            <p className="text-yellow-500">
+              {/* Render stars based on rating */}
+              {renderStars(review.rating)}
+            </p>
             <p>{review.comment}</p>
           </div>
         ))
