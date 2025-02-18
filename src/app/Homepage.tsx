@@ -30,6 +30,10 @@ const michiganBuildings: Building[] = [
     name: "Mason Hall",
     bathrooms: ["1st Floor West", "1st Floor East", "2nd Floor", "3rd Floor"]
   },
+  {
+    name: "Duderstadt Center",
+    bathrooms: ["1st Floor (Mens)", "1st Floor (Gender Inclusive)", "2nd Floor North", "2nd Floor South", "3rd Floor North", "3rd Floor South" ]
+  },
   // Add more buildings as needed
 ];
 

@@ -1,5 +1,10 @@
-- Finish implementing auth functionality --> Add phone numbers?
-- Add list of all bathrooms to the app (w/ other button to fill in missing bathrooms)
+- Finish implementing auth functionality --> Add phone numbers?, figure out how to put users in database with usernames?
+- Finish list of all bathrooms at Michigan
+- Should we display username or first/last name with reviews?
+
+
+
+- Add friend functionality
 
 
 
