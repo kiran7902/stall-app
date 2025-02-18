@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { User } from "firebase/auth";
-import { db } from "../../firebaseConfig"; // Firestore instance
+import { db } from "../../firebaseConfig";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 
 interface Review {
@@ -11,15 +11,39 @@ interface Review {
   comment: string;
 }
 
+// Add building data structure
+interface Building {
+  name: string;
+  bathrooms: string[];
+}
+
+const michiganBuildings: Building[] = [
+  {
+    name: "Michigan Union",
+    bathrooms: ["1st Floor North", "1st Floor South", "2nd Floor", "Basement"]
+  },
+  {
+    name: "Shapiro Library",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"]
+  },
+  {
+    name: "Mason Hall",
+    bathrooms: ["1st Floor West", "1st Floor East", "2nd Floor", "3rd Floor"]
+  },
+  // Add more buildings as needed
+];
+
 export default function HomePage({ user, handleLogout }: { user: User; handleLogout: () => void }) {
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [location, setLocation] = useState("");
+  const [selectedBuilding, setSelectedBuilding] = useState("");
+  const [selectedBathroom, setSelectedBathroom] = useState("");
+  const [customBuilding, setCustomBuilding] = useState("");
+  const [customBathroom, setCustomBathroom] = useState("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
 
-  const reviewsCollection = collection(db, "reviews"); // Firestore collection reference
+  const reviewsCollection = collection(db, "reviews");
 
-  // Fetch reviews from Firestore when the page loads
   useEffect(() => {
     const fetchReviews = async () => {
       const snapshot = await getDocs(reviewsCollection);
@@ -30,8 +54,28 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     fetchReviews();
   }, []);
 
-  // Store the review in Firestore
+  // Reset bathroom selection when building changes
+  useEffect(() => {
+    setSelectedBathroom("");
+    setCustomBathroom("");
+  }, [selectedBuilding]);
+
+  // Get available bathrooms for selected building
+  const getAvailableBathrooms = () => {
+    const building = michiganBuildings.find(b => b.name === selectedBuilding);
+    return building ? building.bathrooms : [];
+  };
+
+  // Get final location string
+  const getLocationString = () => {
+    if (selectedBuilding === "Other") {
+      return `${customBuilding} - ${customBathroom}`;
+    }
+    return `${selectedBuilding} - ${selectedBathroom === "Other" ? customBathroom : selectedBathroom}`;
+  };
+
   const handleSubmitReview = async () => {
+    const location = getLocationString();
     if (!location || !comment) return;
 
     const newReview = {
@@ -42,19 +86,21 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     };
 
     try {
-      const docRef = await addDoc(reviewsCollection, newReview); // Save to Firestore
-      setReviews([{ id: docRef.id, ...newReview }, ...reviews]); // Update UI
+      const docRef = await addDoc(reviewsCollection, newReview);
+      setReviews([{ id: docRef.id, ...newReview }, ...reviews]);
     } catch (error) {
       console.error("Error adding review:", error);
     }
 
     // Reset form
-    setLocation("");
+    setSelectedBuilding("");
+    setSelectedBathroom("");
+    setCustomBuilding("");
+    setCustomBathroom("");
     setRating(5);
     setComment("");
   };
 
-  // Render stars based on rating
   const renderStars = (rating: number) => {
     const fullStars = "⭐".repeat(rating);
     const emptyStars = "☆".repeat(5 - rating);
@@ -75,13 +121,64 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
 
       <div className="mb-6">
         <h3 className="text-xl font-semibold mb-4">Leave a Restroom Review</h3>
-        <input
-          type="text"
-          placeholder="Location (e.g., Michigan Union 2nd Floor)"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4"
-        />
+        
+        {/* Building Selection */}
+        <div className="mb-4">
+          <select
+            value={selectedBuilding}
+            onChange={(e) => setSelectedBuilding(e.target.value)}
+            className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2"
+          >
+            <option value="">Select a Building</option>
+            {michiganBuildings.map((building) => (
+              <option key={building.name} value={building.name}>
+                {building.name}
+              </option>
+            ))}
+            <option value="Other">Other</option>
+          </select>
+
+          {selectedBuilding === "Other" && (
+            <input
+              type="text"
+              placeholder="Enter Building Name"
+              value={customBuilding}
+              onChange={(e) => setCustomBuilding(e.target.value)}
+              className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
+            />
+          )}
+        </div>
+
+        {/* Bathroom Selection */}
+        {selectedBuilding && (
+          <div className="mb-4">
+            <select
+              value={selectedBathroom}
+              onChange={(e) => setSelectedBathroom(e.target.value)}
+              className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2"
+            >
+              <option value="">Select a Bathroom</option>
+              {selectedBuilding !== "Other" &&
+                getAvailableBathrooms().map((bathroom) => (
+                  <option key={bathroom} value={bathroom}>
+                    {bathroom}
+                  </option>
+                ))}
+              <option value="Other">Other</option>
+            </select>
+
+            {(selectedBathroom === "Other" || selectedBuilding === "Other") && (
+              <input
+                type="text"
+                placeholder="Enter Bathroom Location"
+                value={customBathroom}
+                onChange={(e) => setCustomBathroom(e.target.value)}
+                className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
+              />
+            )}
+          </div>
+        )}
+
         <select
           value={rating}
           onChange={(e) => setRating(Number(e.target.value))}
@@ -101,7 +198,8 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
         />
         <button
           onClick={handleSubmitReview}
-          className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition duration-200"
+          disabled={!selectedBuilding || !selectedBathroom || !comment}
+          className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           Submit Review
         </button>
@@ -115,10 +213,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
           <div key={review.id} className="border border-gray-300 rounded-lg p-4 mb-4">
             <p className="font-semibold">{review.user}</p>
             <p className="text-sm text-gray-600">at <em>{review.location}</em></p>
-            <p className="text-yellow-500">
-              {/* Render stars based on rating */}
-              {renderStars(review.rating)}
-            </p>
+            <p className="text-yellow-500">{renderStars(review.rating)}</p>
             <p>{review.comment}</p>
           </div>
         ))

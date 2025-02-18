@@ -1,0 +1,9 @@
+- Finish implementing auth functionality --> Add phone numbers?
+- Add list of all bathrooms to the app (w/ other button to fill in missing bathrooms)
+
+
+
+
+
+Later on
+- Add integration with google maps
