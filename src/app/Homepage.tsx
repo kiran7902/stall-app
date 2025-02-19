@@ -2,6 +2,7 @@ import React, { use, useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import { db } from "../../firebaseConfig";
 import { collection, addDoc, getDocs } from "firebase/firestore";
+import { Star } from "lucide-react"; // to change star icons
 
 interface Review {
   id: string;
@@ -81,26 +82,34 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
   // Define star rating props type for rating function
   interface StarRatingProps {
     rating: number | null;
-    setRating: React.Dispatch<React.SetStateAction<number | null>>;
+    setRating: (rating: number) => void;
   }
+  
   const StarRating: React.FC<StarRatingProps> = ({ rating, setRating }) => {
     const [hovered, setHovered] = useState<number | null>(null);
+  
     return (
       <div className="flex space-x-2 mb-4">
         {[1, 2, 3, 4, 5].map((num) => (
           <button
             key={num}
             onClick={() => setRating(num)}
-            onMouseEnter={() =>  (rating === null ? setHovered(num) : null)}
-            onMouseLeave={() => (rating === null ? setHovered(null) : null)}
-            className="text-3xl cursor-pointer transition duration-200"
+            onMouseEnter={() => setHovered(num)}
+            onMouseLeave={() => setHovered(null)}
+            className="text-yellow-500 text-3xl cursor-pointer transition duration-200"
           >
-            {num <= (hovered !== null && rating === null ? hovered : rating ?? -1) ? "⭐" : "☆"}
+            <Star
+              size={32}
+              fill={num <= (hovered ?? rating ?? 0) ? "gold" : "none"}
+              stroke="gold"
+            />
           </button>
         ))}
       </div>
     );
   };
+
+  
   const handleSubmitReview = async () => {
     const location = getLocationString();
     if (!location || !comment || rating === null) return;
@@ -129,9 +138,13 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
   };
 
   const renderStars = (rating: number) => {
-    const fullStars = "⭐".repeat(rating);
-    const emptyStars = "☆".repeat(5 - rating);
-    return fullStars + emptyStars;
+    return (
+      <span className="flex">
+        {[...Array(5)].map((_, i) => (
+          <Star key={i} fill={i < rating ? "currentColor" : "none"} stroke="currentColor" />
+        ))}
+      </span>
+    );
   };
 
   useEffect(() => {
@@ -240,3 +253,4 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     </div>
   );
 }
+
