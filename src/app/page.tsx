@@ -212,7 +212,7 @@ export default function Home() {
               onClick={handleGoogleLogin}
               className="w-full mt-4 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
             >
-              <Image src="/icons/google_logo.png" alt="Google" className="w-5 h-5" />
+              <Image src="/icons/google_logo.png" alt="Google" width={22} height={22} />
               Sign in with Google
             </button>
 

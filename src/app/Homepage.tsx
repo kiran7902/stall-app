@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { User } from "firebase/auth";
 import { db } from "../../firebaseConfig";
 import { collection, addDoc, getDocs } from "firebase/firestore";
@@ -53,15 +53,19 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
 
   const reviewsCollection = collection(db, "reviews");
 
+
+  // Added to fix Vercel Error
+  const memoizedReviewsCollection = useMemo(() => reviewsCollection, []);
+
   useEffect(() => {
     const fetchReviews = async () => {
-      const snapshot = await getDocs(reviewsCollection);
+      const snapshot = await getDocs(memoizedReviewsCollection);
       const reviewData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Review[];
       setReviews(reviewData);
     };
 
     fetchReviews();
-  }, [reviewsCollection]);
+  }, []);
 
   // Reset bathroom selection when building changes
   useEffect(() => {
