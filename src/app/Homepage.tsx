@@ -208,19 +208,6 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
             )}
           </div>
         )}
-        {/** 
-        <select
-          value={rating}
-          onChange={(e) => setRating(Number(e.target.value))}
-          className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4"
-        >
-          {[1, 2, 3, 4, 5].map((num) => (
-            <option key={num} value={num}>
-              {num} Stars
-            </option>
-          ))}
-        </select>
-        */}
         <StarRating rating={rating} setRating={setRating} />
         <textarea
           placeholder="Leave your review..."
