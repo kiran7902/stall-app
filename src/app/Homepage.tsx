@@ -137,11 +137,15 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     setComment("");
   };
 
-  const renderStars = (rating: number) => {
-    const fullStars = "⭐".repeat(rating);
-    const emptyStars = "☆".repeat(5 - rating);
-    return fullStars + emptyStars;
-  };
+const renderStars = (rating: number) => {
+  return (
+    <div className="flex">
+      {[...Array(5)].map((_, i) => (
+        <Star key={i} fill={i < rating ? "currentColor" : "none"} stroke="currentColor" />
+      ))}
+    </div>
+  );
+};
 
   useEffect(() => {
     console.log("Selected Rating:", rating);
