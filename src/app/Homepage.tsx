@@ -61,7 +61,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     };
 
     fetchReviews();
-  }, []);
+  }, [reviewsCollection]);
 
   // Reset bathroom selection when building changes
   useEffect(() => {

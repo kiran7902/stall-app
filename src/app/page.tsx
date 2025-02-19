@@ -218,7 +218,7 @@ export default function Home() {
 
             {/* Sign-Up Link */}
             <p className="text-sm text-gray-600 text-center mt-4">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <button
                 type="button"
                 onClick={() => setIsSigningUp(true)}
