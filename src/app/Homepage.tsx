@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { User } from "firebase/auth";
 import { db } from "../../firebaseConfig";
 import { collection, addDoc, getDocs } from "firebase/firestore";
@@ -7,7 +7,7 @@ interface Review {
   id: string;
   user: string;
   location: string;
-  rating: number;
+  rating: number | null;
   comment: string;
 }
 
@@ -43,7 +43,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
   const [selectedBathroom, setSelectedBathroom] = useState("");
   const [customBuilding, setCustomBuilding] = useState("");
   const [customBathroom, setCustomBathroom] = useState("");
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState("");
 
   const reviewsCollection = collection(db, "reviews");
@@ -78,9 +78,32 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     return `${selectedBuilding} - ${selectedBathroom === "Other" ? customBathroom : selectedBathroom}`;
   };
 
+  // Define star rating props type for rating function
+  interface StarRatingProps {
+    rating: number | null;
+    setRating: React.Dispatch<React.SetStateAction<number | null>>;
+  }
+  const StarRating: React.FC<StarRatingProps> = ({ rating, setRating }) => {
+    const [hovered, setHovered] = useState<number | null>(null);
+    return (
+      <div className="flex space-x-2 mb-4">
+        {[1, 2, 3, 4, 5].map((num) => (
+          <button
+            key={num}
+            onClick={() => setRating(num)}
+            onMouseEnter={() =>  (rating === null ? setHovered(num) : null)}
+            onMouseLeave={() => (rating === null ? setHovered(null) : null)}
+            className="text-3xl cursor-pointer transition duration-200"
+          >
+            {num <= (hovered !== null && rating === null ? hovered : rating ?? -1) ? "⭐" : "☆"}
+          </button>
+        ))}
+      </div>
+    );
+  };
   const handleSubmitReview = async () => {
     const location = getLocationString();
-    if (!location || !comment) return;
+    if (!location || !comment || rating === null) return;
 
     const newReview = {
       user: user.displayName || user.email || "Anonymous",
@@ -101,7 +124,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     setSelectedBathroom("");
     setCustomBuilding("");
     setCustomBathroom("");
-    setRating(5);
+    setRating(null);
     setComment("");
   };
 
@@ -111,6 +134,9 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     return fullStars + emptyStars;
   };
 
+  useEffect(() => {
+    console.log("Selected Rating:", rating);
+  }, [rating]);
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h2 className="text-2xl font-semibold text-center mb-6">
@@ -182,7 +208,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
             )}
           </div>
         )}
-
+        {/** 
         <select
           value={rating}
           onChange={(e) => setRating(Number(e.target.value))}
@@ -194,6 +220,8 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
             </option>
           ))}
         </select>
+        */}
+        <StarRating rating={rating} setRating={setRating} />
         <textarea
           placeholder="Leave your review..."
           value={comment}
@@ -217,7 +245,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
           <div key={review.id} className="border border-gray-300 rounded-lg p-4 mb-4">
             <p className="font-semibold">{review.user}</p>
             <p className="text-sm text-gray-600">at <em>{review.location}</em></p>
-            <p className="text-yellow-500">{renderStars(review.rating)}</p>
+            <p className="text-yellow-500">{renderStars(review.rating ?? 0)}</p>
             <p>{review.comment}</p>
           </div>
         ))
