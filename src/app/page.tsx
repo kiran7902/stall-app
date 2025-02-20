@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { auth } from "../../firebaseConfig";
 import {
   GoogleAuthProvider,
@@ -9,6 +9,9 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   User,
+  setPersistence,
+  browserLocalPersistence,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore"; 
 import HomePage from "./Homepage";
@@ -20,12 +23,27 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [isSigningUp, setIsSigningUp] = useState(false); // Tracks whether user is on sign-up screen\
   const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(true);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  // Firebase auth persistance for session
+  useEffect(() => {
+    setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
+        setUser(loggedInUser);
+        setLoading(false);
+      });
+
+      return () => unsubscribe();
+    })
+    .catch((error) => console.error("Auth persistance error:", error));
+  }, []);
+  
   // Google login
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
@@ -80,6 +98,18 @@ export default function Home() {
 
   if (user) {
     return <HomePage user={user} handleLogout={handleLogout} />;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center">
+          {/* Rotating spinner */}
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+          <p className="text-gray-700 text-lg mt-4">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
