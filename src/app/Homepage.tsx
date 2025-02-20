@@ -93,11 +93,17 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     setRating: (rating: number) => void;
   }
   
+  // Star rating function component
+  // Handles hovering and shading status of star inputs on rating
   const StarRating: React.FC<StarRatingProps> = ({ rating, setRating }) => {
     const [hovered, setHovered] = useState<number | null>(null);
-  
     return (
       <div className="flex space-x-2 mb-4">
+        {// 5 stars, map each star to some val num
+        // when hovering highlight star and prior
+        // When clicked, select num for rating and stop
+        // hovering feature
+        }
         {[1, 2, 3, 4, 5].map((num) => (
           <button
             key={num}
