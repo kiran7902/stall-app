@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { User } from "firebase/auth";
 import { db } from "../../firebaseConfig";
 import { collection, addDoc, getDocs } from "firebase/firestore";
@@ -35,7 +35,11 @@ const michiganBuildings: Building[] = [
     name: "Duderstadt Center",
     bathrooms: ["1st Floor (Mens)", "1st Floor (Gender Inclusive)", "2nd Floor North", "2nd Floor South", "3rd Floor North", "3rd Floor South" ]
   },
-  // Add more buildings as needed
+  {
+    name:"Ross School of Business",
+    bathrooms: ["Basement", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"]
+  },
+  // Add more buildings and bathrooms as needed
 ];
 
 export default function HomePage({ user, handleLogout }: { user: User; handleLogout: () => void }) {
@@ -49,9 +53,13 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
 
   const reviewsCollection = collection(db, "reviews");
 
+
+  // Added to fix Vercel Error
+  const memoizedReviewsCollection = useMemo(() => reviewsCollection, []);
+
   useEffect(() => {
     const fetchReviews = async () => {
-      const snapshot = await getDocs(reviewsCollection);
+      const snapshot = await getDocs(memoizedReviewsCollection);
       const reviewData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Review[];
       setReviews(reviewData);
     };

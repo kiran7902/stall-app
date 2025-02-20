@@ -13,6 +13,7 @@ import {
 import { doc, setDoc } from "firebase/firestore"; 
 import HomePage from "./Homepage";
 import { db } from "../../firebaseConfig"; // Firestore instance
+import Image from 'next/image'
 
 
 export default function Home() {
@@ -211,13 +212,13 @@ export default function Home() {
               onClick={handleGoogleLogin}
               className="w-full mt-4 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
             >
-              <img src="https://img.icons8.com/?size=512&id=17949&format=png" alt="Google" className="w-5 h-5" />
+              <Image src="/icons/google_logo.png" alt="Google" width={22} height={22} />
               Sign in with Google
             </button>
 
             {/* Sign-Up Link */}
             <p className="text-sm text-gray-600 text-center mt-4">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <button
                 type="button"
                 onClick={() => setIsSigningUp(true)}
