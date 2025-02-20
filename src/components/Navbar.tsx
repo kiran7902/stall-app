@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Home, User, Settings } from "lucide-react";
+import { Home } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const Navbar = () => {
