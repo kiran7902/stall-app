@@ -44,6 +44,18 @@ const Navbar = () => {
                 <span className="hidden sm:inline text-gray-800">Settings</span>
               </div>
             </Link>
+
+            <Link href="/leaderboard">
+              <div
+                className={`flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-200 transition ${
+                  pathname === "/leaderboard" ? "bg-gray-300" : ""
+                }`}
+              >
+                <Leaderboard size={20} className="text-gray-800" />
+                <span className="hidden sm:inline text-gray-800">Leaderboard</span>
+              </div>
+            </Link>
+            
           </div>
           */}
         </nav>

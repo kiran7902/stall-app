@@ -131,7 +131,7 @@ export default function HomePage({ user, handleLogout }: { user: User; handleLog
     console.log("Selected Rating:", rating);
   }, [rating]);
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto p-6 pt-20">
       <h2 className="text-2xl font-semibold text-center mb-6">
         Welcome, {user.displayName || user.email}!
       </h2>
