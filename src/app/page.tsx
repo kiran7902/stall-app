@@ -12,6 +12,7 @@ import {
   setPersistence,
   browserLocalPersistence,
   onAuthStateChanged,
+  updateProfile
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore"; 
 import HomePage from "./Homepage";
@@ -68,27 +69,33 @@ export default function Home() {
     }
   };
 
-  // Email/Password sign-up
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      setUser(result.user);
 
-      // Store first name and last name (you'd need Firestore to save user details)
-      await setDoc(doc(db, "users", result.user.uid), {
-        username,
-        firstName,
-        lastName,
-        email
-      });
+  // Email Sign Up
+  const handleSignUp = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+          const result = await createUserWithEmailAndPassword(auth, email, password);
   
-      setUser(result.user);
-    } catch (error) {
-      console.error("Sign-up failed", error);
-      setError("Sign-up failed. Try a stronger password.");
-    }
+          // Update the user's displayName with firstName and lastName
+          await updateProfile(result.user, {
+              displayName: `${firstName} ${lastName}`,
+          });
+  
+          // Optionally, store additional user details in Firestore
+          await setDoc(doc(db, "users", result.user.uid), {
+              username,
+              firstName,
+              lastName,
+              email
+          });
+  
+          setUser(result.user); // Set user state after profile update
+      } catch (error) {
+          console.error("Sign-up failed", error);
+          setError("Sign-up failed. Try a stronger password.");
+      }
   };
+  
 
   // Logout
   const handleLogout = async () => {
