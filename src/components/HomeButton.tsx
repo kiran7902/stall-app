@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { Home } from 'lucide-react';
-import { use } from 'react';
 
 export default function HomeButton() {
   const router = useRouter();
