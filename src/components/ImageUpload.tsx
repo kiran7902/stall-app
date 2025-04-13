@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { storage } from '@/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Camera, Upload } from 'lucide-react';
+import Image from 'next/image';
 
 interface ImageUploadProps {
   onImageUpload: (url: string) => void;
@@ -170,9 +171,11 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
 
       {previewUrl && !showCamera && (
         <div className="mt-2">
-          <img
+          <Image
             src={previewUrl}
             alt="Preview"
+            width={500}
+            height={300}
             className="w-full h-auto rounded-md"
           />
         </div>

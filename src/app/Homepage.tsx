@@ -65,19 +65,29 @@ export default function HomePage({ user }: HomePageProps) {
 
   const reviewsCollection = collection(db, "reviews");
 
-
-  // Added to fix Vercel Error
-  const memoizedReviewsCollection = useMemo(() => reviewsCollection, []);
+  const memoizedReviewsCollection = useMemo(() => {
+    return collection(db, 'reviews');
+  }, [db]);
 
   useEffect(() => {
     const fetchReviews = async () => {
-      const snapshot = await getDocs(memoizedReviewsCollection);
-      const reviewData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Review[];
-      setReviews(reviewData);
+      try {
+        const querySnapshot = await getDocs(memoizedReviewsCollection);
+        const fetchedReviews = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          user: doc.data().user || 'Anonymous',
+          location: doc.data().location || '',
+          rating: doc.data().rating || 0,
+          comment: doc.data().comment || ''
+        })) as Review[];
+        setReviews(fetchedReviews);
+      } catch (err) {
+        console.error('Error fetching reviews:', err);
+      }
     };
 
     fetchReviews();
-  }, []);
+  }, [memoizedReviewsCollection]);
 
   // Reset bathroom selection when building changes
   useEffect(() => {

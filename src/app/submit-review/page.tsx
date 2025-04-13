@@ -4,20 +4,12 @@ import React, { useState, useEffect } from "react";
 import { User } from "firebase/auth";
 import { db } from "../../../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
-import { Star } from "lucide-react";
 import StarRating from "@/components/StarRating";
 import ImageUpload from "@/components/ImageUpload";
 import { useRouter } from "next/navigation";
 import { Building, michiganBuildings } from "@/data/buildings";
 import { getCurrentLocation, findNearestBuilding } from "@/utils/location";
 
-interface Review {
-  user: string;
-  location: string;
-  rating: number | null;
-  comment: string;
-  imageUrl?: string;
-}
 
 interface SubmitReviewProps {
   user: User;
@@ -29,12 +21,13 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
   const [selectedBathroom, setSelectedBathroom] = useState("");
   const [customBuilding, setCustomBuilding] = useState("");
   const [customBathroom, setCustomBathroom] = useState("");
-  const [rating, setRating] = useState<number | null>(null);
+  const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
-  const [imageUrl, setImageUrl] = useState<string>("");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string>("");
   const [nearestBuilding, setNearestBuilding] = useState<Building | null>(null);
   const [locationError, setLocationError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const getLocation = async () => {
@@ -77,7 +70,7 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
 
   const handleSubmitReview = async () => {
     const location = getLocationString();
-    if (!location || !comment || rating === null) return;
+    if (!location || !comment || rating === 0) return;
 
     const newReview = {
       user: user.displayName || user.email || "Anonymous",
@@ -196,7 +189,7 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
 
         <button
           onClick={handleSubmitReview}
-          disabled={!selectedBuilding || !selectedBathroom || !comment || rating === null}
+          disabled={!selectedBuilding || !selectedBathroom || !comment || rating === 0}
           className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           Submit Review

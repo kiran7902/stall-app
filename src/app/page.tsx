@@ -12,13 +12,24 @@ import {
 import { collection, getDocs, query, where } from "firebase/firestore"; 
 import { db } from "../../firebaseConfig"; // Firestore instance
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
+
+interface Review {
+  id: string;
+  user: string;
+  location: string;
+  rating: number;
+  comment: string;
+  timestamp: string;
+  imageUrl?: string;
+}
 
 type ReviewView = "user" | "all";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [view, setView] = useState<ReviewView>("user");
   const router = useRouter();
 
@@ -58,12 +69,11 @@ export default function Home() {
         const fetchedReviews = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        }));
+        })) as Review[];
+        
         // Sort reviews by timestamp (newest first)
         fetchedReviews.sort((a, b) => {
-          const aTimestamp = (a as any).timestamp;
-          const bTimestamp = (b as any).timestamp;
-          return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
+          return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
         });
         setReviews(fetchedReviews);
       } catch (err) {
@@ -182,9 +192,11 @@ export default function Home() {
                 <p className="text-gray-700 mb-4">{review.comment}</p>
                 {review.imageUrl && (
                   <div className="mt-2">
-                    <img
+                    <Image
                       src={review.imageUrl}
                       alt="Review photo"
+                      width={500}
+                      height={300}
                       className="max-h-64 w-auto rounded-md"
                     />
                   </div>

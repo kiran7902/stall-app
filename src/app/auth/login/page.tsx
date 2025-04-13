@@ -11,7 +11,6 @@ import {
   browserLocalPersistence,
   onAuthStateChanged,
   updateProfile,
-  User
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import Image from 'next/image'
