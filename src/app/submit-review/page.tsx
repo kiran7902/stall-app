@@ -27,7 +27,6 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
   const [uploadError, setUploadError] = useState<string>("");
   const [nearestBuilding, setNearestBuilding] = useState<Building | null>(null);
   const [locationError, setLocationError] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const getLocation = async () => {
@@ -40,7 +39,7 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
             setSelectedBuilding(nearest.name);
           }
         }
-      } catch (error) {
+      } catch {
         setLocationError('Unable to access your location. Please enable location services for better recommendations.');
       }
     };
