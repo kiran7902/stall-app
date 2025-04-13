@@ -1,82 +1,58 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { User } from "firebase/auth";
-import { db } from "../../firebaseConfig";
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { Star } from "lucide-react"; // to change star icons
-import Navbar from "@/components/Navbar";
+import { db } from "../../../firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
+import { Star } from "lucide-react";
 import StarRating from "@/components/StarRating";
-import { signOut } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import ImageUpload from "@/components/ImageUpload";
 import { useRouter } from "next/navigation";
+import { Building, michiganBuildings } from "@/data/buildings";
+import { getCurrentLocation, findNearestBuilding } from "@/utils/location";
 
 interface Review {
-  id: string;
   user: string;
   location: string;
   rating: number | null;
   comment: string;
+  imageUrl?: string;
 }
 
-// Add building data structure
-interface Building {
-  name: string;
-  bathrooms: string[];
-}
-
-const michiganBuildings: Building[] = [
-  {
-    name: "Michigan Union",
-    bathrooms: ["1st Floor North", "1st Floor South", "2nd Floor", "Basement"]
-  },
-  {
-    name: "Shapiro Library",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"]
-  },
-  {
-    name: "Mason Hall",
-    bathrooms: ["1st Floor West", "1st Floor East", "2nd Floor", "3rd Floor"]
-  },
-  {
-    name: "Duderstadt Center",
-    bathrooms: ["1st Floor (Mens)", "1st Floor (Gender Inclusive)", "2nd Floor North", "2nd Floor South", "3rd Floor North", "3rd Floor South" ]
-  },
-  {
-    name:"Ross School of Business",
-    bathrooms: ["Basement", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"]
-  },
-  // Add more buildings and bathrooms as needed
-];
-
-interface HomePageProps {
+interface SubmitReviewProps {
   user: User;
 }
 
-export default function HomePage({ user }: HomePageProps) {
+export default function SubmitReview({ user }: SubmitReviewProps) {
   const router = useRouter();
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [selectedBuilding, setSelectedBuilding] = useState("");
   const [selectedBathroom, setSelectedBathroom] = useState("");
   const [customBuilding, setCustomBuilding] = useState("");
   const [customBathroom, setCustomBathroom] = useState("");
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState("");
-
-  const reviewsCollection = collection(db, "reviews");
-
-
-  // Added to fix Vercel Error
-  const memoizedReviewsCollection = useMemo(() => reviewsCollection, []);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [uploadError, setUploadError] = useState<string>("");
+  const [nearestBuilding, setNearestBuilding] = useState<Building | null>(null);
+  const [locationError, setLocationError] = useState<string>("");
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      const snapshot = await getDocs(memoizedReviewsCollection);
-      const reviewData = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Review[];
-      setReviews(reviewData);
+    const getLocation = async () => {
+      try {
+        const location = await getCurrentLocation();
+        if (location) {
+          const nearest = findNearestBuilding(location.latitude, location.longitude);
+          setNearestBuilding(nearest);
+          if (nearest) {
+            setSelectedBuilding(nearest.name);
+          }
+        }
+      } catch (error) {
+        setLocationError('Unable to access your location. Please enable location services for better recommendations.');
+      }
     };
 
-    fetchReviews();
+    getLocation();
   }, []);
 
   // Reset bathroom selection when building changes
@@ -99,7 +75,6 @@ export default function HomePage({ user }: HomePageProps) {
     return `${selectedBuilding} - ${selectedBathroom === "Other" ? customBathroom : selectedBathroom}`;
   };
 
-  
   const handleSubmitReview = async () => {
     const location = getLocationString();
     if (!location || !comment || rating === null) return;
@@ -109,62 +84,37 @@ export default function HomePage({ user }: HomePageProps) {
       location,
       rating,
       comment,
+      imageUrl,
+      timestamp: new Date().toISOString()
     };
 
     try {
-      const docRef = await addDoc(reviewsCollection, newReview);
-      setReviews([{ id: docRef.id, ...newReview }, ...reviews]);
+      await addDoc(collection(db, "reviews"), newReview);
+      router.push('/');
     } catch (error) {
       console.error("Error adding review:", error);
-    }
-
-    // Reset form
-    setSelectedBuilding("");
-    setSelectedBathroom("");
-    setCustomBuilding("");
-    setCustomBathroom("");
-    setRating(null);
-    setComment("");
-  };
-
-  const renderStars = (rating: number) => {
-    return (
-      <span className="flex">
-        {[...Array(5)].map((_, i) => (
-          <Star key={i} fill={i < rating ? "currentColor" : "none"} stroke="currentColor" />
-        ))}
-      </span>
-    );
-  };
-
-  useEffect(() => {
-    console.log("Selected Rating:", rating);
-  }, [rating]);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push('/auth/login');
-    } catch (error) {
-      console.error("Logout failed", error);
     }
   };
 
   return (
     <div className="max-w-3xl mx-auto p-6 pt-20">
-      <h2 className="text-2xl font-semibold text-center mb-6">
-        Welcome, {user.displayName || user.email}!
-      </h2>
-      <button
-        onClick={handleLogout}
-        className="w-full py-2 bg-red-500 text-white font-bold rounded-md hover:bg-red-600 transition duration-200 mb-6"
-      >
-        Logout
-      </button>
-    <Navbar/>
+      <h2 className="text-2xl font-semibold text-center mb-6">Submit a New Review</h2>
+      
       <div className="mb-6">
-        <h3 className="text-xl font-semibold mb-4">Leave a Restroom Review</h3>
+        {locationError && (
+          <div className="text-yellow-600 text-sm mb-4">
+            {locationError}
+          </div>
+        )}
         
+        {nearestBuilding && (
+          <div className="bg-blue-50 p-3 rounded-md mb-4">
+            <p className="text-sm text-blue-800">
+              Based on your location, we recommend: <strong>{nearestBuilding.name}</strong>
+            </p>
+          </div>
+        )}
+
         {/* Building Selection */}
         <div className="mb-4">
           <select
@@ -221,36 +171,37 @@ export default function HomePage({ user }: HomePageProps) {
             )}
           </div>
         )}
+
         <StarRating rating={rating} setRating={setRating} />
+        
         <textarea
           placeholder="Leave your review..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4"
         />
+
+        <div className="mb-4">
+          <ImageUpload
+            onImageUpload={(url) => {
+              setImageUrl(url);
+              setUploadError("");
+            }}
+            onError={(error) => setUploadError(error)}
+          />
+          {uploadError && (
+            <p className="text-red-500 text-sm mt-2">{uploadError}</p>
+          )}
+        </div>
+
         <button
           onClick={handleSubmitReview}
-          disabled={!selectedBuilding || !selectedBathroom || !comment}
+          disabled={!selectedBuilding || !selectedBathroom || !comment || rating === null}
           className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           Submit Review
         </button>
       </div>
-
-      <h3 className="text-xl font-semibold mb-4">Recent Reviews</h3>
-      {reviews.length === 0 ? (
-        <p className="text-gray-600">No reviews yet.</p>
-      ) : (
-        reviews.map((review) => (
-          <div key={review.id} className="border border-gray-300 rounded-lg p-4 mb-4">
-            <p className="font-semibold">{review.user}</p>
-            <p className="text-sm text-gray-600">at <em>{review.location}</em></p>
-            <p className="text-yellow-500">{renderStars(review.rating ?? 0)}</p>
-            <p>{review.comment}</p>
-          </div>
-        ))
-      )}
     </div>
   );
-}
-
+} 

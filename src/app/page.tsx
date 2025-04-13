@@ -14,11 +14,24 @@ import {
   onAuthStateChanged,
   updateProfile
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore"; 
+import { doc, setDoc, collection, getDocs, query, where } from "firebase/firestore"; 
 import HomePage from "./Homepage";
 import { db } from "../../firebaseConfig"; // Firestore instance
 import Image from 'next/image'
+import { useRouter } from "next/navigation";
+import { Star } from "lucide-react";
 
+interface Review {
+  id: string;
+  user: string;
+  location: string;
+  rating: number;
+  comment: string;
+  timestamp: string;
+  imageUrl?: string;
+}
+
+type ReviewView = "user" | "all";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -30,6 +43,9 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [view, setView] = useState<ReviewView>("user");
+  const router = useRouter();
 
   // Firebase auth persistance for session
   useEffect(() => {
@@ -38,13 +54,48 @@ export default function Home() {
       const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
         setUser(loggedInUser);
         setLoading(false);
+        if (!loggedInUser) {
+          router.push('/auth/login');
+        }
       });
 
       return () => unsubscribe();
     })
     .catch((error) => console.error("Auth persistance error:", error));
-  }, []);
+  }, [router]);
   
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!user) return;
+
+      try {
+        let reviewsQuery;
+        if (view === "user") {
+          reviewsQuery = query(
+            collection(db, "reviews"),
+            where("user", "==", user.displayName || user.email || "Anonymous")
+          );
+        } else {
+          reviewsQuery = collection(db, "reviews");
+        }
+
+        const querySnapshot = await getDocs(reviewsQuery);
+        const fetchedReviews = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Review[];
+        
+        // Sort reviews by timestamp (newest first)
+        fetchedReviews.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        setReviews(fetchedReviews);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    fetchReviews();
+  }, [user, view]);
+
   // Google login
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
@@ -103,9 +154,20 @@ export default function Home() {
     setUser(null);
   };
 
-  if (user) {
-    return <HomePage user={user} handleLogout={handleLogout} />;
-  }
+  const renderStars = (rating: number) => {
+    return (
+      <span className="flex">
+        {[...Array(5)].map((_, i) => (
+          <Star
+            key={i}
+            fill={i < rating ? "currentColor" : "none"}
+            stroke="currentColor"
+            className="w-5 h-5 text-yellow-500"
+          />
+        ))}
+      </span>
+    );
+  };
 
   if (loading) {
     return (
@@ -119,153 +181,113 @@ export default function Home() {
     );
   }
 
+  if (!user) {
+    return null; // Will be redirected by the useEffect
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg">
-        <h2 className="text-center text-2xl font-bold text-gray-900">
-          {isSigningUp ? "Create an Account" : "Welcome to Stall"}
-        </h2>
-        <p className="text-center text-gray-600 mb-4">
-          {isSigningUp ? "Sign up to get started" : "Please login to continue"}
-        </p>
+    <div className="min-h-screen pb-20">
+      <div className="max-w-3xl mx-auto p-6 pt-20">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold">
+            Welcome, {user.displayName || user.email}!
+          </h2>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
+        </div>
 
-        {/* Error Message */}
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        <div className="mb-6">
+          <button
+            onClick={() => router.push('/submit-review')}
+            className="w-full py-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition mb-4"
+          >
+            Submit a New Review
+          </button>
 
-        {isSigningUp ? (
-          // Sign-up form
-          <form onSubmit={handleSignUp} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Username</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">First Name</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-                className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-                className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
+          <div className="flex space-x-4">
             <button
-              type="submit"
-              className="w-full py-3 text-white bg-green-600 rounded-lg hover:bg-green-700 transition"
+              onClick={() => setView("user")}
+              className={`flex-1 py-2 rounded-md transition ${
+                view === "user"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
             >
-              Sign Up
+              Your Reviews
             </button>
+            <button
+              onClick={() => setView("all")}
+              className={`flex-1 py-2 rounded-md transition ${
+                view === "all"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              All Reviews
+            </button>
+          </div>
+        </div>
 
-            <p className="text-sm text-gray-600 text-center mt-4">
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => setIsSigningUp(false)}
-                className="text-blue-600 hover:underline"
-              >
-                Log in
-              </button>
-            </p>
-          </form>
+        <h3 className="text-xl font-semibold mb-4">
+          {view === "user" ? "Your Reviews" : "All Reviews"}
+        </h3>
+        {reviews.length === 0 ? (
+          <p className="text-gray-600">
+            {view === "user" 
+              ? "You haven't submitted any reviews yet."
+              : "No reviews have been submitted yet."}
+          </p>
         ) : (
-          // Login form
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
-            >
-              Login
-            </button>
-          </form>
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <div key={review.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h4 className="font-medium">{review.location}</h4>
+                    {view === "all" && (
+                      <p className="text-sm text-gray-500">By: {review.user}</p>
+                    )}
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {new Date(review.timestamp).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="mb-2">{renderStars(review.rating)}</div>
+                <p className="text-gray-700 mb-4">{review.comment}</p>
+                {review.imageUrl && (
+                  <div className="mt-2">
+                    <img
+                      src={review.imageUrl}
+                      alt="Review photo"
+                      className="max-h-64 w-auto rounded-md"
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
+      </div>
 
-        {!isSigningUp && (
-          <>
-            {/* Google Sign-In */}
-            <button
-              onClick={handleGoogleLogin}
-              className="w-full mt-4 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-100 transition"
-            >
-              <Image src="/icons/google_logo.png" alt="Google" width={22} height={22} />
-              Sign in with Google
-            </button>
-
-            {/* Sign-Up Link */}
-            <p className="text-sm text-gray-600 text-center mt-4">
-              Don&apos;t have an account?{" "}
-              <button
-                type="button"
-                onClick={() => setIsSigningUp(true)}
-                className="text-blue-600 hover:underline"
-              >
-                Sign up
-              </button>
-            </p>
-          </>
-        )}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
+        <div className="max-w-3xl mx-auto flex justify-center space-x-4">
+          <button
+            onClick={() => router.push('/rankings/top')}
+            className="flex-1 max-w-xs py-3 bg-green-500 text-white font-bold rounded-md hover:bg-green-600 transition"
+          >
+            Top Bathrooms
+          </button>
+          <button
+            onClick={() => router.push('/rankings/bottom')}
+            className="flex-1 max-w-xs py-3 bg-red-500 text-white font-bold rounded-md hover:bg-red-600 transition"
+          >
+            Bottom Bathrooms
+          </button>
+        </div>
       </div>
     </div>
   );
