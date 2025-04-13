@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { storage } from '@/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { Camera, Upload } from 'lucide-react';
+import { Camera } from 'lucide-react';
 import Image from 'next/image';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -96,7 +96,6 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
       const response = await fetch(imageData);
       const blob = await response.blob();
       
-      // Generate a unique filename using timestamp and UUID
       const filename = `review_${Date.now()}_${uuidv4()}.jpg`;
       const storageRef = ref(storage, `reviews/${filename}`);
       
@@ -144,24 +143,14 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
         className="hidden"
       />
 
-      <div className="flex gap-2">
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isUploading}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-        >
-          <Upload className="w-4 h-4" />
-          Upload Photo
-        </button>
-        <button
-          onClick={showCamera ? stopCamera : startCamera}
-          disabled={isUploading}
-          className="flex-1 flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-        >
-          <Camera className="w-4 h-4" />
-          {showCamera ? 'Close Camera' : 'Take Photo'}
-        </button>
-      </div>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploading}
+        className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+      >
+        <Camera className="w-4 h-4" />
+        Take Photo
+      </button>
 
       {showCamera && (
         <div className="relative aspect-video">
