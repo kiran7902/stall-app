@@ -121,26 +121,33 @@ function RankingsContent() {
       </div>
 
       <div className="space-y-4">
-        {rankings.map((ranking, index) => (
-          <div key={ranking.location} className="border border-gray-200 rounded-lg p-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-medium">
-                  #{index + 1} {ranking.location}
-                </h3>
-                <p className="text-sm text-gray-500">
-                  {ranking.count} {ranking.count === 1 ? 'review' : 'reviews'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold">
-                  {ranking.rating.toFixed(1)}
-                </span>
-                {renderStars(ranking.rating)}
+        {rankings.map((ranking, index) => {
+          const [building, bathroom] = ranking.location.split(' - ');
+          return (
+            <div 
+              key={ranking.location} 
+              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+              onClick={() => router.push(`/bathrooms/${encodeURIComponent(building)}/${encodeURIComponent(bathroom)}`)}
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg font-medium">
+                    #{index + 1} {ranking.location}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {ranking.count} {ranking.count === 1 ? 'review' : 'reviews'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-semibold">
+                    {ranking.rating.toFixed(1)}
+                  </span>
+                  {renderStars(ranking.rating)}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

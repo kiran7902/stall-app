@@ -217,6 +217,12 @@ export default function Home() {
             Top Bathrooms
           </button>
           <button
+            onClick={() => router.push('/bathrooms')}
+            className="flex-1 max-w-xs py-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition"
+          >
+            All Bathrooms
+          </button>
+          <button
             onClick={() => router.push('/rankings/bottom')}
             className="flex-1 max-w-xs py-3 bg-red-500 text-white font-bold rounded-md hover:bg-red-600 transition"
           >
