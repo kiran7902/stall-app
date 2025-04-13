@@ -3,10 +3,8 @@
 import { useEffect, useState } from "react";
 import { auth } from "../../../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../../firebaseConfig";
 import { useRouter } from "next/navigation";
-import { Building, michiganBuildings } from "@/data/buildings";
+import { michiganBuildings } from "@/data/buildings";
 
 export default function BathroomsPage() {
   const [user, setUser] = useState<User | null>(null);
