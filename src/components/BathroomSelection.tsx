@@ -1,76 +1,41 @@
-import { useState, useEffect } from 'react';
-import { Building, michiganBuildings } from '@/data/buildings';
-import { getCurrentLocation, findNearestBuilding } from '@/utils/location';
+import { useState } from 'react';
+import { michiganBuildings } from '@/data/buildings';
 
 interface BathroomSelectionProps {
-  onSelect: (building: string, floor: string) => void;
+  onSelect: (building: string, bathroom: string) => void;
 }
 
 export default function BathroomSelection({ onSelect }: BathroomSelectionProps) {
-  const [selectedBuilding, setSelectedBuilding] = useState<string>('');
-  const [selectedFloor, setSelectedFloor] = useState<string>('');
-  const [nearestBuilding, setNearestBuilding] = useState<Building | null>(null);
-  const [locationError, setLocationError] = useState<string>('');
-
-  useEffect(() => {
-    const getLocation = async () => {
-      try {
-        const location = await getCurrentLocation();
-        if (location) {
-          const nearest = findNearestBuilding(location.latitude, location.longitude);
-          setNearestBuilding(nearest);
-          if (nearest) {
-            setSelectedBuilding(nearest.name);
-          }
-        }
-      } catch (error) {
-        setLocationError('Unable to access your location. Please enable location services for better recommendations.');
-      }
-    };
-
-    getLocation();
-  }, []);
+  const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [selectedBathroom, setSelectedBathroom] = useState('');
 
   const handleBuildingChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedBuilding(e.target.value);
-    setSelectedFloor('');
+    const building = e.target.value;
+    setSelectedBuilding(building);
+    setSelectedBathroom('');
   };
 
-  const handleFloorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedFloor(e.target.value);
-    onSelect(selectedBuilding, e.target.value);
+  const handleBathroomChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const bathroom = e.target.value;
+    setSelectedBathroom(bathroom);
+    onSelect(selectedBuilding, bathroom);
   };
 
-  const getFloors = () => {
-    const building = michiganBuildings.find(b => b.name === selectedBuilding);
-    return building ? building.bathrooms : [];
-  };
+  const selectedBuildingData = michiganBuildings.find(
+    (building) => building.name === selectedBuilding
+  );
 
   return (
     <div className="space-y-4">
-      {locationError && (
-        <div className="text-yellow-600 text-sm">
-          {locationError}
-        </div>
-      )}
-      
-      {nearestBuilding && (
-        <div className="bg-blue-50 p-3 rounded-md">
-          <p className="text-sm text-blue-800">
-            Based on your location, we recommend: <strong>{nearestBuilding.name}</strong>
-          </p>
-        </div>
-      )}
-
       <div>
         <label htmlFor="building" className="block text-sm font-medium text-gray-700">
-          Select Building
+          Building
         </label>
         <select
           id="building"
           value={selectedBuilding}
           onChange={handleBuildingChange}
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
         >
           <option value="">Select a building</option>
           {michiganBuildings.map((building) => (
@@ -83,19 +48,19 @@ export default function BathroomSelection({ onSelect }: BathroomSelectionProps) 
 
       {selectedBuilding && (
         <div>
-          <label htmlFor="floor" className="block text-sm font-medium text-gray-700">
-            Select Floor
+          <label htmlFor="bathroom" className="block text-sm font-medium text-gray-700">
+            Bathroom
           </label>
           <select
-            id="floor"
-            value={selectedFloor}
-            onChange={handleFloorChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            id="bathroom"
+            value={selectedBathroom}
+            onChange={handleBathroomChange}
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
           >
-            <option value="">Select a floor</option>
-            {getFloors().map((floor) => (
-              <option key={floor} value={floor}>
-                {floor}
+            <option value="">Select a bathroom</option>
+            {selectedBuildingData?.bathrooms.map((bathroom) => (
+              <option key={bathroom} value={bathroom}>
+                {bathroom}
               </option>
             ))}
           </select>

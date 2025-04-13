@@ -3,47 +3,22 @@
 import { useEffect, useState } from "react";
 import { auth } from "../../firebaseConfig";
 import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
   User,
   setPersistence,
   browserLocalPersistence,
   onAuthStateChanged,
-  updateProfile
 } from "firebase/auth";
-import { doc, setDoc, collection, getDocs, query, where } from "firebase/firestore"; 
-import HomePage from "./Homepage";
+import { collection, getDocs, query, where } from "firebase/firestore"; 
 import { db } from "../../firebaseConfig"; // Firestore instance
-import Image from 'next/image'
 import { useRouter } from "next/navigation";
-import { Star } from "lucide-react";
-
-interface Review {
-  id: string;
-  user: string;
-  location: string;
-  rating: number;
-  comment: string;
-  timestamp: string;
-  imageUrl?: string;
-}
 
 type ReviewView = "user" | "all";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
-  const [isSigningUp, setIsSigningUp] = useState(false); // Tracks whether user is on sign-up screen\
-  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [view, setView] = useState<ReviewView>("user");
   const router = useRouter();
 
@@ -61,7 +36,7 @@ export default function Home() {
 
       return () => unsubscribe();
     })
-    .catch((error) => console.error("Auth persistance error:", error));
+    .catch((err) => console.error("Auth persistance error:", err));
   }, [router]);
   
   useEffect(() => {
@@ -83,90 +58,26 @@ export default function Home() {
         const fetchedReviews = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        })) as Review[];
-        
+        }));
         // Sort reviews by timestamp (newest first)
-        fetchedReviews.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        fetchedReviews.sort((a, b) => {
+          const aTimestamp = (a as any).timestamp;
+          const bTimestamp = (b as any).timestamp;
+          return new Date(bTimestamp).getTime() - new Date(aTimestamp).getTime();
+        });
         setReviews(fetchedReviews);
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
+      } catch (err) {
+        console.error("Error fetching reviews:", err);
       }
     };
 
     fetchReviews();
   }, [user, view]);
 
-  // Google login
-  const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      setUser(result.user);
-    } catch (error) {
-      console.error("Login failed", error);
-      setError("Google login failed. Please try again.");
-    }
-  };
-
-  // Email/Password login
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
-      setUser(result.user);
-    } catch (error) {
-      console.error("Login failed", error);
-      setError("Invalid email or password.");
-    }
-  };
-
-
-  // Email Sign Up
-  const handleSignUp = async (e: React.FormEvent) => {
-      e.preventDefault();
-      try {
-          const result = await createUserWithEmailAndPassword(auth, email, password);
-  
-          // Update the user's displayName with firstName and lastName
-          await updateProfile(result.user, {
-              displayName: `${firstName} ${lastName}`,
-          });
-  
-          // Optionally, store additional user details in Firestore
-          await setDoc(doc(db, "users", result.user.uid), {
-              username,
-              firstName,
-              lastName,
-              email
-          });
-  
-          setUser(result.user); // Set user state after profile update
-      } catch (error) {
-          console.error("Sign-up failed", error);
-          setError("Sign-up failed. Try a stronger password.");
-      }
-  };
-  
-
   // Logout
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
-  };
-
-  const renderStars = (rating: number) => {
-    return (
-      <span className="flex">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            fill={i < rating ? "currentColor" : "none"}
-            stroke="currentColor"
-            className="w-5 h-5 text-yellow-500"
-          />
-        ))}
-      </span>
-    );
   };
 
   if (loading) {
@@ -256,7 +167,18 @@ export default function Home() {
                     {new Date(review.timestamp).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="mb-2">{renderStars(review.rating)}</div>
+                <div className="mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-2xl ${
+                        i < review.rating ? "text-yellow-500" : "text-gray-300"
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
                 <p className="text-gray-700 mb-4">{review.comment}</p>
                 {review.imageUrl && (
                   <div className="mt-2">
