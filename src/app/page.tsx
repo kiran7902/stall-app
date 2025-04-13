@@ -197,7 +197,8 @@ export default function Home() {
                       alt="Review photo"
                       width={500}
                       height={300}
-                      className="max-h-64 w-auto rounded-md"
+                      className="w-full h-auto rounded-md object-cover"
+                      unoptimized
                     />
                   </div>
                 )}
