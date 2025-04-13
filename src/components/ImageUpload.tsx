@@ -3,6 +3,7 @@ import { storage } from '@/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Camera, Upload } from 'lucide-react';
 import Image from 'next/image';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ImageUploadProps {
   onImageUpload: (url: string) => void;
@@ -16,6 +17,11 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showCamera, setShowCamera] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -28,7 +34,11 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
   const startCamera = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' },
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
         audio: false 
       });
       
@@ -86,8 +96,8 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
       const response = await fetch(imageData);
       const blob = await response.blob();
       
-      // Generate a unique filename using timestamp
-      const filename = `review_${Date.now()}.jpg`;
+      // Generate a unique filename using timestamp and UUID
+      const filename = `review_${Date.now()}_${uuidv4()}.jpg`;
       const storageRef = ref(storage, `reviews/${filename}`);
       
       await uploadBytes(storageRef, blob);
@@ -130,6 +140,7 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
         ref={fileInputRef}
         onChange={handleFileChange}
         accept="image/*"
+        capture={isMobile ? "environment" : undefined}
         className="hidden"
       />
 
@@ -177,6 +188,7 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
             width={500}
             height={300}
             className="w-full h-auto rounded-md"
+            unoptimized
           />
         </div>
       )}
