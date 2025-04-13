@@ -1,5 +1,5 @@
-import Rankings from "../page";
+import { redirect } from 'next/navigation';
 
 export default function BottomRankings() {
-  return <Rankings type="bottom" />;
-} 
+  redirect('/rankings?type=bottom');
+}

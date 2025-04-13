@@ -2,21 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { User } from "firebase/auth";
-import { db } from "../../../firebaseConfig";
+import { auth, db } from "../../../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import StarRating from "@/components/StarRating";
 import ImageUpload from "@/components/ImageUpload";
 import { useRouter } from "next/navigation";
 import { Building, michiganBuildings } from "@/data/buildings";
 import { getCurrentLocation, findNearestBuilding } from "@/utils/location";
+import { onAuthStateChanged } from "firebase/auth";
 
-
-interface SubmitReviewProps {
-  user: User;
-}
-
-export default function SubmitReview({ user }: SubmitReviewProps) {
+export default function SubmitReview() {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [selectedBuilding, setSelectedBuilding] = useState("");
   const [selectedBathroom, setSelectedBathroom] = useState("");
   const [customBuilding, setCustomBuilding] = useState("");
@@ -27,6 +25,18 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
   const [uploadError, setUploadError] = useState<string>("");
   const [nearestBuilding, setNearestBuilding] = useState<Building | null>(null);
   const [locationError, setLocationError] = useState<string>("");
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
+      setUser(loggedInUser);
+      setLoading(false);
+      if (!loggedInUser) {
+        router.push('/auth/login');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   useEffect(() => {
     const getLocation = async () => {
@@ -68,6 +78,8 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
   };
 
   const handleSubmitReview = async () => {
+    if (!user) return;
+    
     const location = getLocationString();
     if (!location || !comment || rating === 0) return;
 
@@ -87,6 +99,21 @@ export default function SubmitReview({ user }: SubmitReviewProps) {
       console.error("Error adding review:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+          <p className="text-gray-700 text-lg mt-4">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will be redirected by the useEffect
+  }
 
   return (
     <div className="max-w-3xl mx-auto p-6 pt-20">

@@ -38,5 +38,5 @@ export default function SubmitReviewLayout() {
     return null; // Will be redirected by the useEffect
   }
 
-  return <SubmitReview user={user} />;
+  return <SubmitReview />;
 } 
