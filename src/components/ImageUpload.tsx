@@ -14,81 +14,11 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [showCamera, setShowCamera] = useState(false);
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
-  }, [stream]);
-
-  const startCamera = async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        },
-        audio: false 
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play();
-        };
-      }
-      setStream(mediaStream);
-      setShowCamera(true);
-    } catch (error) {
-      console.error('Camera error:', error);
-      onError('Could not access camera. Please check permissions.');
-    }
-  };
-
-  const stopCamera = () => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    setShowCamera(false);
-  };
-
-  const capturePhoto = async () => {
-    if (!videoRef.current) return;
-
-    try {
-      const canvas = document.createElement('canvas');
-      const video = videoRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      
-      if (ctx) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = canvas.toDataURL('image/jpeg', 0.8);
-        setPreviewUrl(imageData);
-        await uploadImage(imageData);
-        stopCamera();
-      }
-    } catch (error) {
-      console.error('Error capturing photo:', error);
-      onError('Failed to capture photo. Please try again.');
-    }
-  };
 
   const uploadImage = async (imageData: string) => {
     try {
@@ -152,24 +82,7 @@ export default function ImageUpload({ onImageUpload, onError }: ImageUploadProps
         Take Photo
       </button>
 
-      {showCamera && (
-        <div className="relative aspect-video">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="w-full h-full object-cover rounded-md"
-          />
-          <button
-            onClick={capturePhoto}
-            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100"
-          >
-            <Camera className="w-6 h-6" />
-          </button>
-        </div>
-      )}
-
-      {previewUrl && !showCamera && (
+      {previewUrl && (
         <div className="mt-2">
           <Image
             src={previewUrl}
