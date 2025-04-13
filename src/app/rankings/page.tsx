@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { auth } from "../../../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
@@ -14,7 +14,7 @@ interface Review {
   count: number;
 }
 
-export default function Rankings() {
+function RankingsContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [rankings, setRankings] = useState<Review[]>([]);
@@ -143,5 +143,20 @@ export default function Rankings() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function Rankings() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
+          <p className="text-gray-700 text-lg mt-4">Loading...</p>
+        </div>
+      </div>
+    }>
+      <RankingsContent />
+    </Suspense>
   );
 } 
