@@ -5,7 +5,7 @@ import { auth } from "../../../firebaseConfig";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../../firebaseConfig";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Star } from "lucide-react";
 
 interface Review {
@@ -14,15 +14,13 @@ interface Review {
   count: number;
 }
 
-interface RankingsProps {
-  type: "top" | "bottom";
-}
-
-export default function Rankings({ type }: RankingsProps) {
+export default function Rankings() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [rankings, setRankings] = useState<Review[]>([]);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const type = searchParams.get('type') as "top" | "bottom" | null;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
@@ -37,6 +35,11 @@ export default function Rankings({ type }: RankingsProps) {
   }, [router]);
 
   useEffect(() => {
+    if (!type || (type !== "top" && type !== "bottom")) {
+      router.push('/');
+      return;
+    }
+
     const fetchRankings = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "reviews"));
@@ -71,7 +74,7 @@ export default function Rankings({ type }: RankingsProps) {
     };
 
     fetchRankings();
-  }, [type]);
+  }, [type, router]);
 
   const renderStars = (rating: number) => {
     return (
@@ -99,7 +102,7 @@ export default function Rankings({ type }: RankingsProps) {
     );
   }
 
-  if (!user) {
+  if (!user || !type) {
     return null;
   }
 
