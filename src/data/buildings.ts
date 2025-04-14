@@ -1,10 +1,11 @@
 export interface Building {
   name: string;
   bathrooms: string[];
-  coordinates?: {
+  coordinates: {
     latitude: number;
     longitude: number;
   };
+  distance?: number; // Optional distance property
 }
 
 export const michiganBuildings: Building[] = [
@@ -12,37 +13,37 @@ export const michiganBuildings: Building[] = [
   {
     name: "Michigan Union",
     bathrooms: ["1st Floor North", "1st Floor South", "2nd Floor", "Basement"],
-    coordinates: { latitude: 42.2758, longitude: -83.7400 }
+    coordinates: { latitude: 42.2750, longitude: -83.7417 }
   },
   {
     name: "Shapiro Library",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2790, longitude: -83.7360 }
+    coordinates: { latitude: 42.2755412, longitude: -83.7372693 }
   },
   {
     name: "Mason Hall",
     bathrooms: ["1st Floor West", "1st Floor East", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2765, longitude: -83.7380 }
+    coordinates: { latitude: 42.2771, longitude: -83.7394 }
   },
   {
     name: "Angell Hall",
     bathrooms: ["1st Floor East", "1st Floor West", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2770, longitude: -83.7400 }
+    coordinates: { latitude: 42.2766, longitude: -83.7397 }
   },
   {
     name: "Hatcher Graduate Library",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2780, longitude: -83.7400 }
+    coordinates: { latitude: 42.2763, longitude: -83.7380 }
   },
   {
     name: "Modern Languages Building",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2750, longitude: -83.7400 }
+    coordinates: { latitude: 42.2799078, longitude:-83.7393258 }
   },
   {
     name: "Chemistry Building",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2800, longitude: -83.7400 }
+    coordinates: { latitude: 42.2776926, longitude: -83.7367749 }
   },
   {
     name: "Ross School of Business",
@@ -52,155 +53,127 @@ export const michiganBuildings: Building[] = [
   {
     name: "Weiser Hall",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2760, longitude: -83.7400 }
+    coordinates: { latitude: 42.2768036, longitude:-83.7364063 }
   },
   {
     name: "Lorch Hall",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2770, longitude: -83.7400 }
+    coordinates: { latitude: 42.2740154, longitude:-83.7381202 }
   },
   {
     name: "Tisch Hall",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2760, longitude: -83.7400 }
+    coordinates: { latitude: 42.2763624, longitude: -83.7405976 }
   },
   {
-    name: "School of Education",
+    name: "Marsal Family School of Education",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2750, longitude: -83.7400 }
+    coordinates: { latitude: 42.2742034, longitude:-83.7361772 }
   },
   {
     name: "School of Social Work",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2740, longitude: -83.7400 }
+    coordinates: { latitude: 42.2746802, longitude:-83.7367994 }
   },
   {
     name: "School of Public Health",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2800, longitude: -83.7400 }
+    coordinates: { latitude: 42.280969, longitude:-83.7308906 }
   },
   {
     name: "School of Nursing",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2810, longitude: -83.7400 }
+    coordinates: { latitude: 42.2850851, longitude: -83.7388538 }
   },
   {
     name: "School of Dentistry",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2820, longitude: -83.7400 }
+    coordinates: { latitude: 42.279079, longitude:-83.7365237 }
   },
+
   {
-    name: "School of Medicine",
+    name: "Law Library",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2830, longitude: -83.7400 }
-  },
-  {
-    name: "School of Law",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2840, longitude: -83.7400 }
+    coordinates: { latitude: 42.2738314, longitude:-83.7393607 }
   },
   {
     name: "School of Music",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2850, longitude: -83.7400 }
+    coordinates: { latitude: 42.2898042, longitude: -83.7209688 }
   },
+
   {
-    name: "School of Art & Design",
+    name: "Taubman College of Architecture and Urban Planning",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2860, longitude: -83.7400 }
+    coordinates: { latitude: 42.2893595, longitude: -83.7174332 }
   },
-  {
-    name: "School of Architecture",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2870, longitude: -83.7400 }
-  },
-  {
-    name: "School of Engineering",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2880, longitude: -83.7400 }
-  },
-  {
-    name: "School of Information",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2890, longitude: -83.7400 }
-  },
+
   {
     name: "School of Kinesiology",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2900, longitude: -83.7400 }
+    coordinates: { latitude: 42.2783676, longitude:-83.7391293 }
   },
   {
-    name: "School of Public Policy",
+    name: "Gerald R. Ford School of Public Policy",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2910, longitude: -83.7400 }
-  },
-  {
-    name: "School of Natural Resources",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2920, longitude: -83.7400 }
-  },
-  {
-    name: "School of Environment",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2930, longitude: -83.7400 }
-  },
-  {
-    name: "School of Pharmacy",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2940, longitude: -83.7400 }
+    coordinates: { latitude: 42.2723551, longitude: -83.7403587 }
   },
 
   // North Campus Buildings
   {
     name: "Duderstadt Center",
     bathrooms: ["1st Floor (Mens)", "1st Floor (Gender Inclusive)", "2nd Floor North", "2nd Floor South", "3rd Floor North", "3rd Floor South"],
-    coordinates: { latitude: 42.2930, longitude: -83.7100 }
-  },
-  {
-    name: "Beyster Building",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2935, longitude: -83.7110 }
+    coordinates: { latitude: 42.2911733, longitude: -83.715983 }
   },
   {
     name: "Bob and Betty Beyster Building",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2940, longitude: -83.7120 }
+    coordinates: { latitude: 42.2929475, longitude:-83.7166477 }
   },
   {
     name: "Chrysler Center",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2925, longitude: -83.7090 }
+    coordinates: { latitude: 42.2906364, longitude: -83.7168295 }
   },
-  {
-    name: "Cooley Building",
-    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2915, longitude: -83.7080 }
-  },
+
   {
     name: "EECS Building",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2758, longitude: -83.7375 }
+    coordinates: { latitude: 42.2924735, longitude: -83.7140423 }
   },
   {
     name: "Francois-Xavier Bagnoud Building",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2920, longitude: -83.7120 }
+    coordinates: { latitude: 42.2936874, longitude: -83.7123786 }
   },
   {
     name: "G.G. Brown Laboratory",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2910, longitude: -83.7110 }
+    coordinates: { latitude: 42.2932626, longitude:-83.7138866 }
   },
 
   {
     name: "Pierpont Commons",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
-    coordinates: { latitude: 42.2915, longitude: -83.7100 }
+    coordinates: { latitude: 42.2911547, longitude:-83.7177679 }
   },
   {
     name: "Stamps Auditorium",
-    bathrooms: ["1st Floor", "2nd Floor"],
-    coordinates: { latitude: 42.2910, longitude: -83.7120 }
+    bathrooms: ["Penny W. Stamps Auditorium"],
+    coordinates: { latitude: 42.2899446, longitude: -83.7175171 }
   },
+  {
+    name: "Michigan League",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
+    coordinates: { latitude: 42.279055, longitude:-83.7375197}
+  },
+  {
+    name: "Dow Building",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
+    coordinates: { latitude: 42.2930322, longitude:-83.7154082}
+  },
+
+
+  
 
 ]; 

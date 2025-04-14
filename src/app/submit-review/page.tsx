@@ -23,9 +23,9 @@ export default function SubmitReview() {
   const [comment, setComment] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string>("");
-  const [nearestBuilding, setNearestBuilding] = useState<Building | null>(null);
   const [locationError, setLocationError] = useState<string>("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [sortedBuildings, setSortedBuildings] = useState<Building[]>([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
@@ -44,19 +44,49 @@ export default function SubmitReview() {
       try {
         const location = await getCurrentLocation();
         if (location) {
-          const nearest = findNearestBuilding(location.latitude, location.longitude);
-          setNearestBuilding(nearest);
-          if (nearest) {
-            setSelectedBuilding(nearest.name);
+          // Sort all buildings by distance
+          const buildingsWithDistance = michiganBuildings
+            .filter(building => building.coordinates) // Only include buildings with coordinates
+            .map(building => ({
+              ...building,
+              distance: calculateDistance(
+                location.latitude,
+                location.longitude,
+                building.coordinates.latitude,
+                building.coordinates.longitude
+              )
+            }));
+
+          buildingsWithDistance.sort((a, b) => a.distance - b.distance);
+          setSortedBuildings(buildingsWithDistance);
+          
+          // Set the closest building as the default selection
+          if (buildingsWithDistance.length > 0) {
+            setSelectedBuilding(buildingsWithDistance[0].name);
           }
         }
       } catch {
         setLocationError('Unable to access your location. Please enable location services for better recommendations.');
+        // If location is not available, use original order
+        setSortedBuildings(michiganBuildings);
       }
     };
 
     getLocation();
   }, []);
+
+  // Helper function to calculate distance between two points in miles
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 3958.8; // Radius of the Earth in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in miles
+  };
 
   // Reset bathroom selection when building changes
   useEffect(() => {
@@ -129,26 +159,20 @@ export default function SubmitReview() {
             {locationError}
           </div>
         )}
-        
-        {nearestBuilding && (
-          <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-md mb-4">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              Based on your location, we recommend: <strong>{nearestBuilding.name}</strong>
-            </p>
-          </div>
-        )}
 
         {/* Building Selection */}
         <div className="mb-4">
+          <label className="block text-base font-semibold text-gray-900 dark:text-white mb-2">
+            Select a Building (Sorted Closest to Furthest)
+          </label>
           <select
             value={selectedBuilding}
             onChange={(e) => setSelectedBuilding(e.target.value)}
             className="block w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
-            <option value="">Select a Building</option>
-            {michiganBuildings.map((building) => (
+            {sortedBuildings.map((building) => (
               <option key={building.name} value={building.name} className="bg-white dark:bg-gray-700">
-                {building.name}
+                {building.name} {building.distance ? `(${building.distance.toFixed(1)} mi)` : ''}
               </option>
             ))}
             <option value="Other">Other</option>
