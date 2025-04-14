@@ -107,9 +107,9 @@ function RankingsContent() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 pt-20">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 pt-20">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
           {type === "top" ? "Top Rated Bathrooms" : "Bottom Rated Bathrooms"}
         </h2>
         <button
@@ -126,23 +126,30 @@ function RankingsContent() {
           return (
             <div 
               key={ranking.location} 
-              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition cursor-pointer"
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition cursor-pointer bg-white dark:bg-gray-800"
               onClick={() => router.push(`/bathrooms/${encodeURIComponent(building)}/${encodeURIComponent(bathroom)}`)}
             >
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="text-lg font-medium">
-                    #{index + 1} {ranking.location}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {ranking.count} {ranking.count === 1 ? 'review' : 'reviews'}
-                  </p>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-blue-500 text-white rounded-lg text-2xl font-bold">
+                  {index + 1}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-semibold">
-                    {ranking.rating.toFixed(1)}
-                  </span>
-                  {renderStars(ranking.rating)}
+                <div className="flex-grow">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        {ranking.location}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {ranking.count} {ranking.count === 1 ? 'review' : 'reviews'}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {ranking.rating.toFixed(1)}
+                      </span>
+                      {renderStars(ranking.rating)}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
