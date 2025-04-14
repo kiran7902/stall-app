@@ -8,7 +8,7 @@ import StarRating from "@/components/StarRating";
 import ImageUpload from "@/components/ImageUpload";
 import { useRouter } from "next/navigation";
 import { Building, michiganBuildings } from "@/data/buildings";
-import { getCurrentLocation, findNearestBuilding } from "@/utils/location";
+import { getCurrentLocation } from "@/utils/location";
 import { onAuthStateChanged } from "firebase/auth";
 
 export default function SubmitReview() {
