@@ -8,6 +8,7 @@ export interface Building {
 }
 
 export const michiganBuildings: Building[] = [
+  // Central Campus Buildings
   {
     name: "Michigan Union",
     bathrooms: ["1st Floor North", "1st Floor South", "2nd Floor", "Basement"],
@@ -22,16 +23,6 @@ export const michiganBuildings: Building[] = [
     name: "Mason Hall",
     bathrooms: ["1st Floor West", "1st Floor East", "2nd Floor", "3rd Floor"],
     coordinates: { latitude: 42.2765, longitude: -83.7380 }
-  },
-  {
-    name: "Duderstadt Center",
-    bathrooms: ["1st Floor (Mens)", "1st Floor (Gender Inclusive)", "2nd Floor North", "2nd Floor South", "3rd Floor North", "3rd Floor South"],
-    coordinates: { latitude: 42.2930, longitude: -83.7100 }
-  },
-  {
-    name: "Ross School of Business",
-    bathrooms: ["Basement", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
-    coordinates: { latitude: 42.2900, longitude: -83.7150 }
   },
   {
     name: "Angell Hall",
@@ -52,6 +43,11 @@ export const michiganBuildings: Building[] = [
     name: "Chemistry Building",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
     coordinates: { latitude: 42.2800, longitude: -83.7400 }
+  },
+  {
+    name: "Ross School of Business",
+    bathrooms: ["Basement", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
+    coordinates: { latitude: 42.2730, longitude: -83.7379 }
   },
   {
     name: "Weiser Hall",
@@ -152,5 +148,59 @@ export const michiganBuildings: Building[] = [
     name: "School of Pharmacy",
     bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
     coordinates: { latitude: 42.2940, longitude: -83.7400 }
-  }
+  },
+
+  // North Campus Buildings
+  {
+    name: "Duderstadt Center",
+    bathrooms: ["1st Floor (Mens)", "1st Floor (Gender Inclusive)", "2nd Floor North", "2nd Floor South", "3rd Floor North", "3rd Floor South"],
+    coordinates: { latitude: 42.2930, longitude: -83.7100 }
+  },
+  {
+    name: "Beyster Building",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
+    coordinates: { latitude: 42.2935, longitude: -83.7110 }
+  },
+  {
+    name: "Bob and Betty Beyster Building",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
+    coordinates: { latitude: 42.2940, longitude: -83.7120 }
+  },
+  {
+    name: "Chrysler Center",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
+    coordinates: { latitude: 42.2925, longitude: -83.7090 }
+  },
+  {
+    name: "Cooley Building",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
+    coordinates: { latitude: 42.2915, longitude: -83.7080 }
+  },
+  {
+    name: "EECS Building",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
+    coordinates: { latitude: 42.2758, longitude: -83.7375 }
+  },
+  {
+    name: "Francois-Xavier Bagnoud Building",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
+    coordinates: { latitude: 42.2920, longitude: -83.7120 }
+  },
+  {
+    name: "G.G. Brown Laboratory",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor", "4th Floor"],
+    coordinates: { latitude: 42.2910, longitude: -83.7110 }
+  },
+
+  {
+    name: "Pierpont Commons",
+    bathrooms: ["1st Floor", "2nd Floor", "3rd Floor"],
+    coordinates: { latitude: 42.2915, longitude: -83.7100 }
+  },
+  {
+    name: "Stamps Auditorium",
+    bathrooms: ["1st Floor", "2nd Floor"],
+    coordinates: { latitude: 42.2910, longitude: -83.7120 }
+  },
+
 ]; 
