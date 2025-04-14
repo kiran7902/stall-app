@@ -9,10 +9,18 @@ import {
   browserLocalPersistence,
   onAuthStateChanged,
 } from "firebase/auth";
-import { collection, getDocs, query, where } from "firebase/firestore"; 
+import { collection, getDocs, query, where, doc, updateDoc, arrayUnion } from "firebase/firestore"; 
 import { db } from "../../firebaseConfig"; // Firestore instance
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
+import { Heart, MessageSquare } from "lucide-react";
+
+interface Reply {
+  id: string;
+  user: string;
+  comment: string;
+  timestamp: string;
+}
 
 interface Review {
   id: string;
@@ -22,6 +30,9 @@ interface Review {
   comment: string;
   timestamp: string;
   imageUrl?: string;
+  isAnonymous: boolean;
+  likes: string[]; // Array of user IDs who liked the review
+  replies: Reply[];
 }
 
 type ReviewView = "user" | "all";
@@ -31,6 +42,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [view, setView] = useState<ReviewView>("user");
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState("");
+  const [lastTapTime, setLastTapTime] = useState(0);
   const router = useRouter();
 
   // Firebase auth persistance for session
@@ -68,7 +82,9 @@ export default function Home() {
         const querySnapshot = await getDocs(reviewsQuery);
         const fetchedReviews = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          likes: doc.data().likes || [], // Ensure likes array exists
+          replies: doc.data().replies || [] // Ensure replies array exists
         })) as Review[];
         
         // Sort reviews by timestamp (newest first)
@@ -88,6 +104,70 @@ export default function Home() {
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
+  };
+
+  const handleLike = async (reviewId: string) => {
+    if (!user) return;
+    
+    try {
+      const reviewRef = doc(db, "reviews", reviewId);
+      const review = reviews.find(r => r.id === reviewId);
+      
+      if (!review) return;
+      
+      const isLiked = review.likes.includes(user.uid);
+      const newLikes = isLiked 
+        ? review.likes.filter(id => id !== user.uid)
+        : [...review.likes, user.uid];
+      
+      await updateDoc(reviewRef, { likes: newLikes });
+      
+      setReviews(reviews.map(r => 
+        r.id === reviewId 
+          ? { ...r, likes: newLikes }
+          : r
+      ));
+    } catch (error) {
+      console.error("Error updating like:", error);
+    }
+  };
+
+  const handleReply = async (reviewId: string) => {
+    if (!user || !replyText.trim()) return;
+    
+    try {
+      const reviewRef = doc(db, "reviews", reviewId);
+      const newReply: Reply = {
+        id: Date.now().toString(),
+        user: user.displayName || user.email || "Anonymous",
+        comment: replyText,
+        timestamp: new Date().toISOString()
+      };
+      
+      await updateDoc(reviewRef, {
+        replies: arrayUnion(newReply)
+      });
+      
+      setReviews(reviews.map(r => 
+        r.id === reviewId 
+          ? { ...r, replies: [...r.replies, newReply] }
+          : r
+      ));
+      
+      setReplyText("");
+      setReplyingTo(null);
+    } catch (error) {
+      console.error("Error adding reply:", error);
+    }
+  };
+
+  const handleDoubleTap = (reviewId: string) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTapTime;
+    if (tapLength < 300 && tapLength > 0) {
+      handleLike(reviewId);
+    }
+    setLastTapTime(currentTime);
   };
 
   if (loading) {
@@ -165,10 +245,14 @@ export default function Home() {
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
-              <div key={review.id} className="border border-gray-200 rounded-lg p-4">
+              <div 
+                key={review.id} 
+                className="border border-gray-200 rounded-lg p-4"
+                onTouchStart={() => handleDoubleTap(review.id)}
+              >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h4 className="font-medium">{review.location}</h4>
+                    <h4 className="font-medium text-lg">{review.location}</h4>
                     {view === "all" && (
                       <p className="text-sm text-gray-500">By: {review.user}</p>
                     )}
@@ -189,7 +273,7 @@ export default function Home() {
                     </span>
                   ))}
                 </div>
-                <p className="text-gray-700 mb-4">{review.comment}</p>
+                <p className="text-gray-700 mb-4 text-base">{review.comment}</p>
                 {review.imageUrl && (
                   <div className="mt-2">
                     <Image
@@ -200,6 +284,68 @@ export default function Home() {
                       className="w-full h-auto rounded-md object-cover"
                       unoptimized
                     />
+                  </div>
+                )}
+
+                <div className="flex items-center gap-6 mt-4">
+                  <button
+                    onClick={() => handleLike(review.id)}
+                    className={`flex items-center gap-2 text-sm ${
+                      review.likes.includes(user?.uid || '') 
+                        ? 'text-red-500' 
+                        : 'text-gray-500'
+                    }`}
+                  >
+                    <Heart
+                      size={20}
+                      fill={review.likes.includes(user?.uid || '') ? 'currentColor' : 'none'}
+                    />
+                    <span className="text-base">{review.likes.length}</span>
+                  </button>
+                  
+                  <button
+                    onClick={() => setReplyingTo(replyingTo === review.id ? null : review.id)}
+                    className="flex items-center gap-2 text-sm text-gray-500"
+                  >
+                    <MessageSquare size={20} />
+                    <span className="text-base">{review.replies.length}</span>
+                  </button>
+                </div>
+
+                {replyingTo === review.id && (
+                  <div className="mt-4 pl-4 border-l-2 border-gray-200">
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write a reply..."
+                      className="w-full p-3 border border-gray-300 rounded-md mb-2 text-base"
+                      rows={3}
+                    />
+                    <div className="flex items-center justify-end">
+                      <button
+                        onClick={() => handleReply(review.id)}
+                        disabled={!replyText.trim()}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-md text-base disabled:opacity-50"
+                      >
+                        Reply
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {review.replies.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    {review.replies.map((reply) => (
+                      <div key={reply.id} className="pl-4 border-l-2 border-gray-200">
+                        <div className="flex justify-between items-start">
+                          <p className="text-sm font-medium">{reply.user}</p>
+                          <span className="text-xs text-gray-500">
+                            {new Date(reply.timestamp).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 mt-1">{reply.comment}</p>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

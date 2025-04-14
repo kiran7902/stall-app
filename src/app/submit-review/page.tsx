@@ -91,7 +91,9 @@ export default function SubmitReview() {
       comment,
       imageUrl,
       timestamp: new Date().toISOString(),
-      isAnonymous
+      isAnonymous,
+      likes: [],
+      replies: []
     };
 
     try {
