@@ -25,10 +25,10 @@ export default function BathroomsPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100">
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
-          <p className="text-gray-700 text-lg mt-4">Loading...</p>
+          <p className="text-gray-700 dark:text-gray-300 text-lg mt-4">Loading...</p>
         </div>
       </div>
     );
@@ -39,10 +39,10 @@ export default function BathroomsPage() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-3xl mx-auto p-6 pt-20">
+    <div className="min-h-screen pb-20 bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 pt-20">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
             All Bathrooms
           </h2>
           <button
@@ -53,16 +53,19 @@ export default function BathroomsPage() {
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {michiganBuildings.map((building) => (
-            <div key={building.name} className="border border-gray-200 rounded-lg p-4">
-              <h3 className="text-xl font-semibold mb-3">{building.name}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div 
+              key={building.name} 
+              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition"
+            >
+              <h3 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">{building.name}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {building.bathrooms.map((bathroom) => (
                   <button
                     key={bathroom}
                     onClick={() => router.push(`/bathrooms/${encodeURIComponent(building.name)}/${encodeURIComponent(bathroom)}`)}
-                    className="text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-md transition"
+                    className="text-left p-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-md transition text-gray-900 dark:text-white"
                   >
                     {bathroom}
                   </button>
