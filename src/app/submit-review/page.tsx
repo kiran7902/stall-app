@@ -25,6 +25,7 @@ export default function SubmitReview() {
   const [uploadError, setUploadError] = useState<string>("");
   const [nearestBuilding, setNearestBuilding] = useState<Building | null>(null);
   const [locationError, setLocationError] = useState<string>("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (loggedInUser) => {
@@ -84,12 +85,13 @@ export default function SubmitReview() {
     if (!location || !comment || rating === 0) return;
 
     const newReview = {
-      user: user.displayName || user.email || "Anonymous",
+      user: isAnonymous ? "Anonymous" : (user.displayName || user.email || "Anonymous"),
       location,
       rating,
       comment,
       imageUrl,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      isAnonymous
     };
 
     try {
@@ -211,6 +213,25 @@ export default function SubmitReview() {
           {uploadError && (
             <p className="text-red-500 text-sm mt-2">{uploadError}</p>
           )}
+        </div>
+
+        <div className="mb-4 flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+          <span className="text-sm font-medium text-gray-700">Post anonymously</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isAnonymous}
+            onClick={() => setIsAnonymous(!isAnonymous)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+              isAnonymous ? 'bg-blue-600' : 'bg-gray-200'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                isAnonymous ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
         </div>
 
         <button
