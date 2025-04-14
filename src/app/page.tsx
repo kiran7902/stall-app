@@ -247,17 +247,17 @@ export default function Home() {
             {reviews.map((review) => (
               <div 
                 key={review.id} 
-                className="border border-gray-200 rounded-lg p-4"
+                className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800"
                 onTouchStart={() => handleDoubleTap(review.id)}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h4 className="font-medium text-lg">{review.location}</h4>
+                    <h4 className="font-medium text-lg text-gray-900 dark:text-white">{review.location}</h4>
                     {view === "all" && (
-                      <p className="text-sm text-gray-500">By: {review.user}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">By: {review.user}</p>
                     )}
                   </div>
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
                     {new Date(review.timestamp).toLocaleDateString()}
                   </span>
                 </div>
@@ -266,14 +266,14 @@ export default function Home() {
                     <span
                       key={i}
                       className={`text-2xl ${
-                        i < review.rating ? "text-yellow-500" : "text-gray-300"
+                        i < review.rating ? "text-yellow-500" : "text-gray-300 dark:text-gray-600"
                       }`}
                     >
                       ★
                     </span>
                   ))}
                 </div>
-                <p className="text-gray-700 mb-4 text-base">{review.comment}</p>
+                <p className="text-gray-700 dark:text-gray-300 mb-4 text-base">{review.comment}</p>
                 {review.imageUrl && (
                   <div className="mt-2">
                     <Image
@@ -293,7 +293,7 @@ export default function Home() {
                     className={`flex items-center gap-2 text-sm ${
                       review.likes.includes(user?.uid || '') 
                         ? 'text-red-500' 
-                        : 'text-gray-500'
+                        : 'text-gray-500 dark:text-gray-400'
                     }`}
                   >
                     <Heart
@@ -305,7 +305,7 @@ export default function Home() {
                   
                   <button
                     onClick={() => setReplyingTo(replyingTo === review.id ? null : review.id)}
-                    className="flex items-center gap-2 text-sm text-gray-500"
+                    className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400"
                   >
                     <MessageSquare size={20} />
                     <span className="text-base">{review.replies.length}</span>
@@ -313,12 +313,12 @@ export default function Home() {
                 </div>
 
                 {replyingTo === review.id && (
-                  <div className="mt-4 pl-4 border-l-2 border-gray-200">
+                  <div className="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                     <textarea
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                       placeholder="Write a reply..."
-                      className="w-full p-3 border border-gray-300 rounded-md mb-2 text-base"
+                      className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md mb-2 text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       rows={3}
                     />
                     <div className="flex items-center justify-end">
@@ -336,14 +336,14 @@ export default function Home() {
                 {review.replies.length > 0 && (
                   <div className="mt-4 space-y-3">
                     {review.replies.map((reply) => (
-                      <div key={reply.id} className="pl-4 border-l-2 border-gray-200">
+                      <div key={reply.id} className="pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                         <div className="flex justify-between items-start">
-                          <p className="text-sm font-medium">{reply.user}</p>
-                          <span className="text-xs text-gray-500">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{reply.user}</p>
+                          <span className="text-xs text-gray-500 dark:text-gray-400">
                             {new Date(reply.timestamp).toLocaleDateString()}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-700 mt-1">{reply.comment}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{reply.comment}</p>
                       </div>
                     ))}
                   </div>
