@@ -120,19 +120,19 @@ export default function SubmitReview() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 pt-20">
-      <h2 className="text-2xl font-semibold text-center mb-6">Submit a New Review</h2>
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 pt-20">
+      <h2 className="text-2xl font-semibold text-center mb-6 text-gray-900 dark:text-white">Submit a New Review</h2>
       
       <div className="mb-6">
         {locationError && (
-          <div className="text-yellow-600 text-sm mb-4">
+          <div className="text-yellow-600 dark:text-yellow-400 text-sm mb-4">
             {locationError}
           </div>
         )}
         
         {nearestBuilding && (
-          <div className="bg-blue-50 p-3 rounded-md mb-4">
-            <p className="text-sm text-blue-800">
+          <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-md mb-4">
+            <p className="text-sm text-blue-800 dark:text-blue-200">
               Based on your location, we recommend: <strong>{nearestBuilding.name}</strong>
             </p>
           </div>
@@ -143,11 +143,11 @@ export default function SubmitReview() {
           <select
             value={selectedBuilding}
             onChange={(e) => setSelectedBuilding(e.target.value)}
-            className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2"
+            className="block w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="">Select a Building</option>
             {michiganBuildings.map((building) => (
-              <option key={building.name} value={building.name}>
+              <option key={building.name} value={building.name} className="bg-white dark:bg-gray-700">
                 {building.name}
               </option>
             ))}
@@ -160,7 +160,7 @@ export default function SubmitReview() {
               placeholder="Enter Building Name"
               value={customBuilding}
               onChange={(e) => setCustomBuilding(e.target.value)}
-              className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
+              className="block w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
           )}
         </div>
@@ -171,12 +171,12 @@ export default function SubmitReview() {
             <select
               value={selectedBathroom}
               onChange={(e) => setSelectedBathroom(e.target.value)}
-              className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2"
+              className="block w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">Select a Bathroom</option>
               {selectedBuilding !== "Other" &&
                 getAvailableBathrooms().map((bathroom) => (
-                  <option key={bathroom} value={bathroom}>
+                  <option key={bathroom} value={bathroom} className="bg-white dark:bg-gray-700">
                     {bathroom}
                   </option>
                 ))}
@@ -189,7 +189,7 @@ export default function SubmitReview() {
                 placeholder="Enter Bathroom Location"
                 value={customBathroom}
                 onChange={(e) => setCustomBathroom(e.target.value)}
-                className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200"
+                className="block w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             )}
           </div>
@@ -201,7 +201,8 @@ export default function SubmitReview() {
           placeholder="Leave your review..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          className="block w-full p-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4"
+          className="block w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          rows={4}
         />
 
         <div className="mb-4">
@@ -213,19 +214,19 @@ export default function SubmitReview() {
             onError={(error) => setUploadError(error)}
           />
           {uploadError && (
-            <p className="text-red-500 text-sm mt-2">{uploadError}</p>
+            <p className="text-red-500 dark:text-red-400 text-sm mt-2">{uploadError}</p>
           )}
         </div>
 
-        <div className="mb-4 flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-          <span className="text-sm font-medium text-gray-700">Post anonymously</span>
+        <div className="mb-4 flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Post anonymously</span>
           <button
             type="button"
             role="switch"
             aria-checked={isAnonymous}
             onClick={() => setIsAnonymous(!isAnonymous)}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-              isAnonymous ? 'bg-blue-600' : 'bg-gray-200'
+              isAnonymous ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
             }`}
           >
             <span
@@ -239,7 +240,7 @@ export default function SubmitReview() {
         <button
           onClick={handleSubmitReview}
           disabled={!selectedBuilding || !selectedBathroom || !comment || rating === 0}
-          className="w-full py-2 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+          className="w-full py-3 bg-blue-500 text-white font-bold rounded-md hover:bg-blue-600 transition duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
         >
           Submit Review
         </button>
