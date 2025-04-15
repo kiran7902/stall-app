@@ -9,11 +9,11 @@ import {
   browserLocalPersistence,
   onAuthStateChanged,
 } from "firebase/auth";
-import { collection, getDocs, query, where, doc, updateDoc, arrayUnion } from "firebase/firestore"; 
+import { collection, getDocs, query, where, doc, updateDoc, arrayUnion, deleteDoc } from "firebase/firestore"; 
 import { db } from "../../firebaseConfig"; // Firestore instance
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
-import { Heart, MessageSquare } from "lucide-react";
+import { Heart, MessageSquare, Trash2 } from "lucide-react";
 
 interface Reply {
   id: string;
@@ -182,6 +182,41 @@ export default function Home() {
     setLastTapTime(currentTime);
   };
 
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!user) return;
+    
+    try {
+      const reviewRef = doc(db, "reviews", reviewId);
+      await deleteDoc(reviewRef);
+      
+      setReviews(reviews.filter(review => review.id !== reviewId));
+    } catch (error) {
+      console.error("Error deleting review:", error);
+    }
+  };
+
+  const handleDeleteReply = async (reviewId: string, replyId: string) => {
+    if (!user) return;
+    
+    try {
+      const reviewRef = doc(db, "reviews", reviewId);
+      const review = reviews.find(r => r.id === reviewId);
+      
+      if (!review) return;
+      
+      const updatedReplies = review.replies.filter(reply => reply.id !== replyId);
+      await updateDoc(reviewRef, { replies: updatedReplies });
+      
+      setReviews(reviews.map(r => 
+        r.id === reviewId 
+          ? { ...r, replies: updatedReplies }
+          : r
+      ));
+    } catch (error) {
+      console.error("Error deleting reply:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -283,9 +318,20 @@ export default function Home() {
                       <p className="text-sm text-gray-500 dark:text-gray-400">By: {review.user}</p>
                     )}
                   </div>
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(review.timestamp).toLocaleDateString()}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(review.timestamp).toLocaleDateString()}
+                    </span>
+                    {(view === "user" || review.user === user?.displayName || review.user === user?.email) && (
+                      <button
+                        onClick={() => handleDeleteReview(review.id)}
+                        className="p-1 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition"
+                        title="Delete review"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div className="mb-2">
                   {[...Array(5)].map((_, i) => (
@@ -364,7 +410,18 @@ export default function Home() {
                     {review.replies.map((reply) => (
                       <div key={reply.id} className="pl-4 border-l-2 border-gray-200 dark:border-gray-700">
                         <div className="flex justify-between items-start">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">{reply.user}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">{reply.user}</p>
+                            {(reply.user === user?.displayName || reply.user === user?.email) && (
+                              <button
+                                onClick={() => handleDeleteReply(review.id, reply.id)}
+                                className="p-1 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 transition"
+                                title="Delete reply"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            )}
+                          </div>
                           <span className="text-xs text-gray-500 dark:text-gray-400">
                             {new Date(reply.timestamp).toLocaleDateString()}
                           </span>
