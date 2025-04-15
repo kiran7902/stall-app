@@ -36,12 +36,14 @@ interface Review {
 }
 
 type ReviewView = "user" | "all";
+type SortOption = "newest" | "oldest" | "mostLiked";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [view, setView] = useState<ReviewView>("user");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [lastTapTime, setLastTapTime] = useState(0);
@@ -83,14 +85,24 @@ export default function Home() {
         const fetchedReviews = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          likes: doc.data().likes || [], // Ensure likes array exists
-          replies: doc.data().replies || [] // Ensure replies array exists
+          likes: doc.data().likes || [],
+          replies: doc.data().replies || []
         })) as Review[];
         
-        // Sort reviews by timestamp (newest first)
+        // Sort reviews based on selected option
         fetchedReviews.sort((a, b) => {
-          return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+          switch (sortBy) {
+            case "newest":
+              return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+            case "oldest":
+              return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+            case "mostLiked":
+              return b.likes.length - a.likes.length;
+            default:
+              return 0;
+          }
         });
+        
         setReviews(fetchedReviews);
       } catch (err) {
         console.error("Error fetching reviews:", err);
@@ -98,7 +110,7 @@ export default function Home() {
     };
 
     fetchReviews();
-  }, [user, view]);
+  }, [user, view, sortBy]);
 
   // Logout
   const handleLogout = async () => {
@@ -190,7 +202,7 @@ export default function Home() {
     <div className="min-h-screen pb-20">
       <div className="max-w-3xl mx-auto p-6 pt-20">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
             Welcome, {user.displayName || user.email}!
           </h2>
           <button
@@ -209,31 +221,45 @@ export default function Home() {
             Submit a New Review
           </button>
 
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setView("user")}
-              className={`flex-1 py-2 rounded-md transition ${
-                view === "user"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              Your Reviews
-            </button>
-            <button
-              onClick={() => setView("all")}
-              className={`flex-1 py-2 rounded-md transition ${
-                view === "all"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              All Reviews
-            </button>
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex space-x-4">
+              <button
+                onClick={() => setView("user")}
+                className={`flex-1 py-2 rounded-md transition ${
+                  view === "user"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+              >
+                Your Reviews
+              </button>
+              <button
+                onClick={() => setView("all")}
+                className={`flex-1 py-2 rounded-md transition ${
+                  view === "all"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+              >
+                All Reviews
+              </button>
+            </div>
+            <div className="flex justify-end items-center gap-2">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort By:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="w-48 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="mostLiked">Most Liked</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <h3 className="text-xl font-semibold mb-4">
+        <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
           {view === "user" ? "Your Reviews" : "All Reviews"}
         </h3>
         {reviews.length === 0 ? (
