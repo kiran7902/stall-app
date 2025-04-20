@@ -96,6 +96,7 @@ export default function SubmitReview() {
 
   // Get available bathrooms for selected building
   const getAvailableBathrooms = () => {
+    if (selectedBuilding === "Other") return [];
     const building = michiganBuildings.find(b => b.name === selectedBuilding);
     return building ? building.bathrooms : [];
   };
@@ -198,12 +199,11 @@ export default function SubmitReview() {
               className="block w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 focus:ring focus:ring-blue-200 mb-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">Select a Bathroom</option>
-              {selectedBuilding !== "Other" &&
-                getAvailableBathrooms().map((bathroom) => (
-                  <option key={bathroom} value={bathroom} className="bg-white dark:bg-gray-700">
-                    {bathroom}
-                  </option>
-                ))}
+              {getAvailableBathrooms().map((bathroom) => (
+                <option key={bathroom} value={bathroom} className="bg-white dark:bg-gray-700">
+                  {bathroom}
+                </option>
+              ))}
               <option value="Other">Other</option>
             </select>
 
