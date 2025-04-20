@@ -66,9 +66,17 @@ export default function SubmitReview() {
           }
         }
       } catch {
-        setLocationError('Unable to access your location. Please enable location services for better recommendations.');
-        // If location is not available, use original order
-        setSortedBuildings(michiganBuildings);
+        setLocationError('Unable to access your location. Buildings are sorted alphabetically.');
+        // If location is not available, sort buildings alphabetically
+        const alphabeticalBuildings = [...michiganBuildings].sort((a, b) => 
+          a.name.localeCompare(b.name)
+        );
+        setSortedBuildings(alphabeticalBuildings);
+        
+        // Set the first building alphabetically as the default selection
+        if (alphabeticalBuildings.length > 0) {
+          setSelectedBuilding(alphabeticalBuildings[0].name);
+        }
       }
     };
 
