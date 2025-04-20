@@ -41,6 +41,13 @@ export default function SubmitReview() {
 
   useEffect(() => {
     const getLocation = async () => {
+      // Default to alphabetical sorting
+      const alphabeticalBuildings = [...michiganBuildings].sort((a, b) => 
+        a.name.localeCompare(b.name)
+      );
+      setSortedBuildings(alphabeticalBuildings);
+      setSelectedBuilding(alphabeticalBuildings[0].name);
+
       try {
         const location = await getCurrentLocation();
         if (location) {
@@ -67,16 +74,6 @@ export default function SubmitReview() {
         }
       } catch {
         setLocationError('Unable to access your location. Buildings are sorted alphabetically.');
-        // If location is not available, sort buildings alphabetically
-        const alphabeticalBuildings = [...michiganBuildings].sort((a, b) => 
-          a.name.localeCompare(b.name)
-        );
-        setSortedBuildings(alphabeticalBuildings);
-        
-        // Set the first building alphabetically as the default selection
-        if (alphabeticalBuildings.length > 0) {
-          setSelectedBuilding(alphabeticalBuildings[0].name);
-        }
       }
     };
 
